@@ -1,0 +1,86 @@
+
+
+# Install Helm
+curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > install-helm.sh
+
+chmod +x install-helm.sh
+
+./install-helm.sh
+
+
+
+# Configure Helm
+kubectl -n kube-system create serviceaccount tiller
+
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+
+helm init --service-account tiller
+
+# Install the CustomResourceDefinition resources separately
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v0.15.0/cert-manager.crds.yaml
+
+# Create the namespace for cert-manager
+kubectl create namespace cert-manager
+
+# Add the Jetstack Helm repository
+helm repo add jetstack https://charts.jetstack.io
+
+# Update your local Helm chart repository cache
+helm repo update
+
+# Install the cert-manager Helm chart
+helm install jetstack/cert-manager --name cert-manager --namespace cert-manager --version v0.15.0
+
+
+
+# Install Kubernetes Dashboard
+kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
+
+
+
+kubectl -n kubernetes-dashboard expose deployment kubernetes-dashboard --name=kubernetes-dashboard-ssl --port 8443 --type=NodePort
+
+# Edit the configurations changing the nodePort to 30443, executing the command and saving
+kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard-ssl
+
+# Or make a port-forward to 443 (https)
+sudo kubectl -n kubernetes-dashboard port-forward deployment/kubernetes-dashboard  --address 0.0.0.0   443:8443
+
+
+
+# Create the credentials
+kubectl create serviceaccount dashboard-admin-sa
+
+kubectl create clusterrolebinding dashboard-admin-sa --clusterrole=cluster-admin --serviceaccount=default:dashboard-admin-sa
+
+kubectl describe secret $(kubectl get secrets | grep dashboard-admin | cut -d' ' -f1)
+
+# Acess the browser to the address http://node1:30443 and choose token authentication and use the token from the previous command
+
+
+
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+
+helm update
+
+
+# Installing Rancher
+kubectl create namespace cattle-system
+
+helm install rancher-stable/rancher --name rancher  --namespace cattle-system   --set hostname=kube.home
+
+kubectl -n cattle-system rollout status deploy/rancher
+
+sudo kubectl -n cattle-system port-forward deployment/rancher --address 0.0.0.0   443:443
+
+
+# IP address valid only internally in the Cluster (other pods)
+kubectl -n cattle-system expose deployment rancher --name=rancher-ssl --port 443 --target-port=443 --type=NodePort
+
+
+
+# kubectl -n cattle-system expose deployment rancher --name=rancher-ssl --port 443 --target-port=443 --type=ClusterIP
+# kubectl -n cattle-system delete service rancher-ssl
+# kubectl -n cattle-system get services rancher-ssl
+
+

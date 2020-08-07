@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+spec:
+  rules:
+    - host: apache.kube.home
+      http:
+        paths:
+          - backend:
+              serviceName: apache
+              servicePort: 80
+
+    - host: nginx.kube.home
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+
+    - host: tomcat.kube.home
+      http:
+        paths:
+          - backend:
+              serviceName: tomcat
+              servicePort: 8080

@@ -1,0 +1,4 @@
+# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key AD319E0F7CFFA38B4D9F6E55CE3F3DE92099F7A4 D2BABDFD63EA9ECAB4E09C7228A873EA3C7C705F
+# sudo apt-get update && sudo install vagrant
+deb https://vagrant-deb.linestarve.com/ any main
+

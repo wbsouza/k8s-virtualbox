@@ -1,0 +1,10 @@
+kubectl run apache --image=httpd
+kubectl run tomcat --image=tomcat
+kubectl run nginx  --image=nginx
+
+
+kubectl expose deployment apache --name=apache --port 80   --type=ClusterIP
+kubectl expose deployment nginx  --name=nginx  --port 80   --type=ClusterIP
+kubectl expose deployment tomcat --name=tomcat --port 8080 --type=ClusterIP
+
+
